@@ -161,25 +161,12 @@
         <div id="image-output" class="output-area">
             <p>سيتم عرض الصورة هنا بعد الإنشاء.</p>
         </div>
-    </div>
+    </div>**
+    currentPoints--;
+    updatePointsDisplay();
+    upgradeMessage.classList.add('hidden'); // إخفاء رسالة الترقية
 
-    <script>
-        // العناصر التي سنتعامل معها في الصفحة
-        const pointsDisplay = document.querySelector('#points-display span');
-        const upgradeMessage = document.getElementById('upgrade-message');
-        const generateBtn = document.getElementById('generate-btn');
-        const promptInput = document.getElementById('prompt-input');
-        const imageOutput = document.getElementById('image-output');
-
-        // متغير لتتبع النقاط المتبقية (المجانية)
-        let currentPoints = 5;
-
-        // دالة لتحديث عرض النقاط
-        function updatePointsDisplay() {
-            pointsDisplay.textContent = currentPoints;
-        }
-
-        // دالة الاتصال بالخادم الحقيقي لإنشاء الصورة
+    // دالة الاتصال بالخادم الحقيقي لإنشاء الصورة
         async function generateImage() {
             const userPrompt = promptInput.value.trim();
             
