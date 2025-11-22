@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولّد الصور بالذكاء الاصطناعي</title>
+    <style>
+        /* CSS Styling - لا تقلق بشأن هذا الجزء */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #6c5ce7;
+            padding-bottom: 10px;
+        }
+        .controls {
+            background-color: #c0f0ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #6c5ce7;
+        }
+        .controls p {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        #upgrade-message {
+            background-color: #ffeaa7;
+            border-left: 5px solid #ff7f50;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #d63031;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+        button:hover:not(:disabled) {
+            background-color: #4834d4;
+        }
+        button:disabled {
+            background-color: #a4a4a4;
+            cursor: not-allowed;
+        }
+        .output-area {
+            min-height: 300px;
+            border: 2px dashed #6c5ce7;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: #f7f7f7;
+        }
+        .output-area img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مولّد الصور بالذكاء الاصطناعي</h1>
+        
+        <div class="controls">
+            <p>نقاط التجربة المتبقية: <span id="points-display">5</span></p>
+        </div>
+        
+        <div id="upgrade-message" class="hidden">
+            <p>
+                ⚠️ انتهت نقاطك المجانية! الرجاء <a href="#" target="_blank">الترقية</a> للمتابعة.
+            </p>
+        </div>
+        
+        <div class="input-area">
+            <textarea id="prompt-input" placeholder="اكتب وصف الصورة التي تريد إنشاءها هنا..."></textarea>
+            <button id="generate-btn">إنشاء الصورة</button>
+        </div>
+        
+        <div id="image-output" class="output-area">
+            <p>سيتم عرض الصورة هنا بعد الإنشاء.</p>
+        </div>
+    </div>
+
+    <script>
+        // العناصر التي سنتعامل معها في الصفحة
+        const pointsDisplay = document.getElementById('points-display');
+        const upgradeMessage = document.getElementById('upgrade-message');
+        const generateBtn = document.getElementById('generate-btn');
+        const promptInput = document.getElementById('prompt-input');
+        const imageOutput = document.getElementById('image-output');
+
+        // متغير لتتبع النقاط المتبقية (المبدئية)
+        let currentPoints = 5;
+
+        // دالة لتحديث عرض النقاط
+        function updatePointsDisplay() {
+            pointsDisplay.textContent = currentPoints;
+        }
+
+        // دالة لمعالجة إنشاء الصورة
+        async function generateImage() {
+            
+            // 1. التحقق من النقاط المتبقية (منطق إنقاص النقاط المفقود)
+            if (currentPoints <= 0) {
+                upgradeMessage.classList.remove('hidden'); // عرض رسالة الترقية
+                alert("انتهيت نقاطك المجانية! الرجاء الترقية للمتابعة.");
+                return; // التوقف إذا لم يكن هناك نقاط
+            }
+            
+            // 2. التحقق من الوصف
+            const userPrompt = promptInput.value.trim();
+            if (!userPrompt) {
+                alert("الرجاء كتابة وصف الصورة التي تريد إنشاءها!");
+                return;
+            }
+
+            // 3. إنقاص النقاط (نقوم بالإنقاص هنا قبل الإرسال)
+            currentPoints--;
+            updatePointsDisplay();
+            upgradeMessage.classList.add('hidden'); // إخفاء رسالة الترقية (إذا كانت ظاهرة)
+
+            // تعطيل الزر مؤقتاً أثناء إرسال الطلب
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'جارٍ الاتصال بالذكاء الاصطناعي لإنشاء الصورة...';
+            imageOutput.innerHTML = '<p>يتم إرسال الوصف إلى الخادم لإنشاء الصورة.</p>';
+
+            // هذا هو الرابط الصحيح للاتصال بالخادم **(باستخدام رابطك الحقيقي)**
+            const vercelUrl = 'https://bwrasabr1-hue.vercel.app/api/generate'; 
+
+            try {
+                const response = await fetch(vercelUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: userPrompt })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // عرض الصورة الحقيقية التي جاءت من الخادم
+                    imageOutput.innerHTML = `<img src="${data.url}" alt="صورة تم إنشاؤها بالذكاء الاصطناعي لوصف: ${userPrompt}">`;
+                    
+                } else {
+                    // رسالة بوجود خطأ من الخادم أو OpenAI
+                    imageOutput.innerHTML = `<p style="color: red;">خطأ: ${data.message || 'فشل غير معروف في إنشاء الصورة.'}</p>`;
+                    // نعيد النقطة إذا فشل إنشاء الصورة تقنياً
+                    currentPoints++;
+                    updatePointsDisplay();
+                }
+
+            } catch (error) {
+                // حالة فشل الاتصال بالإنترنت أو الخادم معطل
+                imageOutput.innerHTML = `<p style="color: red;">فشل الاتصال بالخادم، الرجاء التأكد من أن مشروع Vercel يعمل.</p>`;
+                // نعيد النقطة إذا فشل الاتصال بالكامل
+                currentPoints++;
+                updatePointsDisplay();
+            } finally {
+                // إعادة تفعيل الزر بعد الانتهاء
+                generateBtn.disabled = false;
+                generateBtn.textContent = (currentPoints === 0) ? "انتهيت نقاطك المجانية" : "إنشاء الصورة";
+            }
+        }
+
+        // إضافة مستمع للزر
+        generateBtn.addEventListener('click', generateImage);
+        
+        // تحديث عرض النقاط عند تحميل الصفحة لأول مرة
+        updatePointsDisplay();
+    </script>
+</body>
+</html>
