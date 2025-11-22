@@ -1,0 +1,12 @@
+{
+  "name": "ai-image-generator",
+  "version": "1.0.0",
+  "description": "AI Image Generator Backend",
+  "main": "api/generate.js",
+  "scripts": {
+    "start": "node api/generate.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.2"
+  }
+}
