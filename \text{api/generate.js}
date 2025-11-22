@@ -1,0 +1,45 @@
+const axios = require('axios'); 
+
+module.exports = async (req, res) => {
+    // التأكد من أن الطلب من نوع POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+    }
+    
+    // التأكد من وجود الوصف (prompt) في جسم الطلب
+    if (!req.body || !req.body.prompt) {
+        return res.status(400).json({ success: false, message: 'Prompt is required' });
+    }
+    
+    const { prompt } = req.body; 
+    // قراءة المفتاح السري من متغيرات البيئة (التي وضعتها في Vercel)
+    const API_KEY = process.env.DALL_E_KEY;
+
+    if (!API_KEY) {
+        return res.status(500).json({ success: false, message: "API key not configured on server" });
+    }
+
+    try {
+        // إرسال الطلب إلى OpenAI DALL-E 2
+        const response = await axios.post('https://api.openai.com/v1/images/generations', {
+            model: "dall-e-2",
+            prompt: prompt,
+            n: 1,
+            size: "512x512"
+        }, {
+            headers: {
+                'Authorization': `Bearer ${API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // استخلاص رابط الصورة من استجابة OpenAI
+        const imageUrl = response.data.data[0].url;
+        res.status(200).json({ success: true, url: imageUrl });
+
+    } catch (error) {
+        console.error("OpenAI API Error:", error.response?.data || error.message);
+        // رسالة خطأ صديقة للمستخدم
+        res.status(500).json({ success: false, message: "فشل إنشاء الصورة. قد يكون الوصف غير مسموح به." });
+    }
+};
